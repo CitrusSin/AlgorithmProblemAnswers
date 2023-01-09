@@ -5,8 +5,7 @@ using namespace std;
 vector<int64_t> kmp_next(const string& str) {
     size_t n = str.size();
     vector<int64_t> next(n, -1);
-    int64_t i=1, j=0;
-    while (i < n) {
+    for (int64_t i=1,j=0; i < n; i++,j++) {
         if (str[i] == str[j]) {
             next[i] = next[j];
         } else {
@@ -15,8 +14,6 @@ vector<int64_t> kmp_next(const string& str) {
                 j = next[j];
             }
         }
-        i++;
-        j++;
     }
     return next;
 }

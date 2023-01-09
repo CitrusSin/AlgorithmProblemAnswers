@@ -5,8 +5,7 @@ using i64 = long long;
 vector<i64> kmp_next(const string& str) {
     size_t n = str.size();
     vector<i64> next(n, -1);
-    i64 i=1, j=0;
-    while (i < n) {
+    for (i64 i=1,j=0; i<n; i++,j++) {
         if (str[i] == str[j]) {
             next[i] = next[j];
         } else {
@@ -15,8 +14,6 @@ vector<i64> kmp_next(const string& str) {
                 j = next[j];
             }
         }
-        i++;
-        j++;
     }
     return next;
 }

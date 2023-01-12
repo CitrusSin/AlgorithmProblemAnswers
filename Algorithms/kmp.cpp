@@ -41,6 +41,7 @@ size_t kmp_match(const string& str, const string& pat, const vector<int64_t>& ne
             }
         }
     }
+    if (j == np) return i-np;
     return (1ull << 63) | maxj;
 }
 

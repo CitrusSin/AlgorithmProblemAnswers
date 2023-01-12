@@ -11,7 +11,7 @@ int main() {
     int n;
     cin >> n;
 
-    vector<int> heights(n);
+    vector<u64> heights(n);
     for (int i=0; i<n; i++) {
         cin >> heights[i];
     }
@@ -36,16 +36,11 @@ int main() {
     }
     st.clear();
     for (int i=n-1; i>=0; i--) {
-        while (!st.empty() && heights[st.back()]<heights[i]) {
+        while (!st.empty() && heights[st.back()]<=heights[i]) {
             st.pop_back();
         }
         if (!st.empty()) {
-            int p = heights[st.back()];
-            auto it = st.rbegin();
-            while (it != st.rend() && heights[*it] == p) {
-                it++;
-                cnt++;
-            }
+            cnt++;
         }
         st.push_back(i);
     }

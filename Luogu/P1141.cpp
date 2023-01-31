@@ -1,126 +1,85 @@
 #include <bits/stdc++.h>
-
 using namespace std;
-const int N = 1000;
 
-inline int fast_read() {
-    char ch = getchar();
-    while (ch < '0' || ch > '9') {
-        ch = getchar();
+const size_t N = 1000;
+bool square[N][N], mark[N][N];
+int result_data[N][N];
+
+const int offset_x[4] = {1, 0, 0, -1};
+const int offset_y[4] = {0, 1, -1, 0};
+
+template <size_t P, size_t Q>
+int fill_area(const bool (*square_ptr)[P][Q], bool (*mark_ptr)[P][Q], int n, int x, int y) {
+    (*mark_ptr)[x][y] = true;
+    int area = 1;
+    for (int d=0; d<4; d++) {
+        int x2 = x+offset_x[d];
+        int y2 = y+offset_y[d];
+        if (x2 < 0 || x2 >= n || y2 < 0 || y2 >= n || (*mark_ptr)[x2][y2] || (*square_ptr)[x][y] == (*square_ptr)[x2][y2]) {
+            continue;
+        }
+        area += fill_area(square_ptr, mark_ptr, n, x2, y2);
     }
-
-    int res = 0;
-
-    while (ch >= '0' && ch <= '9') {
-        res *= 10;
-        res += ch & 0x0f;
-        ch = getchar();
-    }
-
-    return res;
+    return area;
 }
 
-inline void fast_write(int x) {
-    if (x == 0) {
-        putchar('0');
-        return;
-    }
-    if (x < 0) {
-        putchar('-');
-        x = -x;
-    }
-    char buf[21], *ptr = buf;
-    while (x) {
-        *ptr++ = (x%10) | 0x30;
-        x /= 10;
-    }
-    while (ptr > buf) {
-        putchar(*--ptr);
-    }
-}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
 
-char mat[N][N];
-int dst2d[N][N][2], rst[N][N];
-int n;
+    string first_line;
+    getline(cin, first_line);
+    stringstream flss(first_line);
 
-void set_count_mat(const vector< vector<char> >& matrix) {
-    n = matrix.size();
+    int n, m;
+    flss >> n >> m;
+    
     for (int i=0; i<n; i++) {
+        string line;
+        getline(cin, line);
         for (int j=0; j<n; j++) {
-            mat[i][j] = matrix[i][j];
-            dst2d[i][j][0] = dst2d[i][j][1] = -1;
-            rst[i][j] = -1;
+            square[i][j] = line[j] == '1';
         }
     }
-}
 
-int count_block(int x, int y) {
-    static const int offset_x[4] = {1, 0, 0, -1}, 
-                     offset_y[4] = {0, -1, 1, 0};
-    
-    if (dst2d[x][y][0] != -1) {
-        int res = count_block(dst2d[x][y][0], dst2d[x][y][1]);
-        dst2d[x][y][0] = dst2d[x][y][1] = -1;
-        rst[x][y] = res;
-        return res;
-    }
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            if (result_data[i][j] != 0) {
+                continue;
+            }
+            memset(mark, 0, sizeof(mark));
+            int area = fill_area(&square, &mark, n, i, j);
+            
+            queue< pair<int, int> > bfsq;
+            bfsq.emplace(i, j);
+            result_data[i][j] = area;
+            while (!bfsq.empty()) {
+                int s = bfsq.size();
+                while (s--) {
+                    pair<int, int> pos = bfsq.front();
+                    bfsq.pop();
 
-    if (rst[x][y] != -1) {
-        return rst[x][y];
-    }
-
-    vector< vector<char> > marks(n, vector<char>(n, 0));
-
-    int cnt = 1;
-    char status = 0;
-    queue< pair<int, int> > bfsq;
-    bfsq.emplace(x, y);
-    marks[x][y] = 1;
-
-    while (!bfsq.empty()) {
-        size_t s = bfsq.size();
-        for (size_t k=0; k<s; k++) {
-            pair<int, int> pos0 = bfsq.front();
-            bfsq.pop();
-            char sign = mat[pos0.first][pos0.second];
-
-            for (int i=0; i<4; i++) {
-                int x2 = pos0.first + offset_x[i];
-                int y2 = pos0.second + offset_y[i];
-                if (x2 >= 0 && x2 < n && y2 >= 0 && y2 < n
-                    && !marks[x2][y2] && mat[x2][y2] != sign) {
-                    bfsq.emplace(x2, y2);
-                    dst2d[x2][y2][0] = x;
-                    dst2d[x2][y2][1] = y;
-                    marks[x2][y2] = 1;
-                    cnt++;
+                    for (int d=0; d<4; d++) {
+                        int x2 = pos.first+offset_x[d];
+                        int y2 = pos.second+offset_y[d];
+                        if (x2 < 0 || x2 >= n || y2 < 0 || y2 >= n || !mark[x2][y2] || result_data[x2][y2]) {
+                            continue;
+                        }
+                        result_data[x2][y2] = area;
+                        bfsq.emplace(x2, y2);
+                    }
                 }
             }
         }
     }
 
-    rst[x][y] = cnt;
-    return cnt;
-}
-
-int main() {
-    int n = fast_read(), m = fast_read();
-
-    vector< vector<char> > matrix(n, vector<char>(n, 0));
-    for (int i=0; i<n; i++) {
-        for (int j=0; j<n; j++) {
-            matrix[i][j] = getchar()=='1';
-        }
-        while (getchar() != '\n');
-    }
-
-    set_count_mat(matrix);
-
     while (m--) {
-        int x = fast_read(), y = fast_read();
-        //cout << count_block(x-1, y-1) << endl;
-        fast_write(count_block(x-1, y-1));
-        putchar('\n');
+        int x, y;
+        cin >> x >> y;
+        x--;
+        y--;
+        cout << result_data[x][y] << endl;
     }
     return 0;
 }

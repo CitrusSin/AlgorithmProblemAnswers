@@ -55,7 +55,7 @@ vector<u64> shortest_path_all_heap(const vector<vector<pair<int, u64>>>& adjt, i
     size_t found_cnt = 0;
     dist[start] = 0;
 
-    while (!notfound.empty()) {
+    while (!notfound.empty() && found_cnt < n) {
         int source = notfound.top().id;
         notfound.pop();
         found[source] = true;

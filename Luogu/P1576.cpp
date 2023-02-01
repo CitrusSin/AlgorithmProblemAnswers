@@ -39,13 +39,18 @@ vector<double> shortest_path(const vector<vector<pair<int, double>>>& graph, int
 }
 
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cout << fixed << setprecision(8);
+    
     int n, m;
-    scanf("%d%d", &n, &m);
+    cin >> n >> m;
 
     vector<vector<pair<int, double>>> graph(n);
     while (m--) {
         int x, y, z;
-        scanf("%d%d%d", &x, &y, &z);
+        cin >> x >> y >> z;
         double multiplier = (100-z)/100.0;
         x--, y--;
         graph[x].emplace_back(y, multiplier);
@@ -53,12 +58,12 @@ int main() {
     }
 
     int a, b;
-    scanf("%d%d", &a, &b);
+    cin >> a >> b;
     a--, b--;
 
     vector<double> sp = shortest_path(graph, a);
     double result = 100.0/sp[b];
 
-    printf("%.8lf\n", result);
+    cout << result << endl;
     return 0;
 }

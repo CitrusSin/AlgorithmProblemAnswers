@@ -6,33 +6,40 @@ using u64 = unsigned long long;
 const int mod = 100003;
 
 vector<int> shortest_path_count_all(const vector<vector<pair<int, u64>>>& adjt, int start) {
+    struct nfnode {
+        int id;
+        u64 dist;
+        nfnode(int id, int dist) : id(id), dist(dist) {}
+        bool operator<(const nfnode& n) const {
+            return dist > n.dist;
+        }
+    };
     using vecbool = vector<char>;
+    
     size_t n = adjt.size();
 
     vecbool found(n, false);
+    priority_queue<nfnode> notfound;
+    notfound.emplace(0, 0);
     vector<u64> dist(n, -1ll);
     vector<int> cnt(n, 0);
+    cnt[start] = 1;
     size_t found_cnt = 0;
     dist[start] = 0;
-    cnt[start] = 1;
 
-    while (found_cnt < n) {
-        int source = -1;
-        for (size_t i=0; i<n; i++) {
-            if (!found[i] && dist[i] >= 0 && (source < 0 || dist[i] < dist[source])) {
-                source = i;
-            }
-        }
-        if (source == -1) break;
+    while (!notfound.empty()) {
+        int source = notfound.top().id;
 
         found[source] = true;
         found_cnt++;
+        notfound.pop();
 
         for (const pair<int, int>& link : adjt[source]) {
             int target = link.first;
             u64 length = link.second + dist[source];
             if (!found[target]) {
                 if (length < dist[target]) {
+                    notfound.emplace(target, length);
                     dist[target] = length;
                     cnt[target] = cnt[source];
                 } else if (length == dist[target]) {
@@ -45,6 +52,7 @@ vector<int> shortest_path_count_all(const vector<vector<pair<int, u64>>>& adjt, 
 
     return cnt;
 }
+
 
 int main() {
     ios::sync_with_stdio(false);

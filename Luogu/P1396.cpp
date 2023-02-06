@@ -1,39 +1,7 @@
 #include <bits/stdc++.h>
+
 using namespace std;
-using u64 = uint64_t;
-
-vector<u64> shortest_path_all(const vector<vector<pair<int, u64>>>& adjt, int start) {
-    using vecbool = vector<char>;
-    size_t n = adjt.size();
-
-    vecbool found(n, false);
-    vector<u64> dist(n, -1ll);
-    size_t found_cnt = 0;
-    dist[start] = 0;
-
-    while (found_cnt < n) {
-        int source = -1;
-        for (size_t i=0; i<n; i++) {
-            if (!found[i] && dist[i] >= 0 && (source < 0 || dist[i] < dist[source])) {
-                source = i;
-            }
-        }
-        if (source == -1) break;
-
-        found[source] = true;
-        found_cnt++;
-
-        for (const pair<int, u64>& link : adjt[source]) {
-            int target = link.first;
-            u64 length = link.second + dist[source];
-            if (!found[target]) {
-                dist[target] = min<u64>(dist[target], length);
-            }
-        }
-    }
-
-    return dist;
-}
+using u64 = unsigned long long;
 
 vector<u64> shortest_path_all_heap(const vector<vector<pair<int, u64>>>& adjt, int start) {
     struct nfnode {
@@ -67,7 +35,7 @@ vector<u64> shortest_path_all_heap(const vector<vector<pair<int, u64>>>& adjt, i
 
         for (const pair<int, u64>& link : adjt[source]) {
             int target = link.first;
-            u64 length = link.second + dist[source];
+            u64 length = max(link.second, dist[source]);
             if (!found[target] && length < dist[target]) {
                 dist[target] = length;
                 notfound.emplace(target, length);
@@ -76,4 +44,28 @@ vector<u64> shortest_path_all_heap(const vector<vector<pair<int, u64>>>& adjt, i
     }
 
     return dist;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
+    int n, m, s, t;
+    cin >> n >> m >> s >> t;
+    s--, t--;
+
+    vector<vector<pair<int, u64>>> graph(n);
+
+    while (m--) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        graph[u].emplace_back(v, w);
+        graph[v].emplace_back(u, w);
+    }
+
+    vector<u64> resis = shortest_path_all_heap(graph, s);
+    cout << resis[t] << endl;
+    return 0;
 }

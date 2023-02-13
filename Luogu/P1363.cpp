@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
+using u64 = uint64_t;
+using u32 = uint32_t;
 
 constexpr bool pos_in_bound(int x, int y, int n, int m) {
     return x>=0 && x<n && y>=0 && y<m;
@@ -9,60 +11,52 @@ constexpr int clamp(int x, int b) {
     return x>=0 ? x%b : (b-(-x)%b)%b;
 }
 
-bool process_matrix(const vector< vector<char> >& mat) {
+u64 compress_position(int x, int y) {
+    union {
+        struct{
+            int px;
+            int py;
+        };
+        u64 val;
+    } s;
+    s.px = x, s.py = y;
+    return s.val;
+}
+
+bool dfs(const vector<vector<char>>& mat, unordered_map<u64, bool>& sign, int n, int m, int lx, int ly) {
     static const int offset_x[4] = {-1, 0, 0, 1};
     static const int offset_y[4] = {0, -1, 1, 0};
 
-    if (mat.size() == 0) return false;
+    for (int d=0; d<4; d++) {
+        int lx2 = lx+offset_x[d], ly2 = ly+offset_y[d];
+        int x2 = clamp(lx2, n), y2 = clamp(ly2, m);
+
+        u64 comp_pos = compress_position(lx2, ly2);
+        u64 origin_pos = compress_position(x2, y2);
+
+        if (lx2 == x2 && ly2 == y2) {
+            if (!sign[comp_pos] && mat[x2][y2]) {
+                sign[comp_pos] = true;
+                bool res = dfs(mat, sign, n, m, lx2, ly2);
+                if (res) return true;
+            }
+        } else if (mat[x2][y2]) {
+            if (sign[origin_pos]) return true;
+            if (!sign[comp_pos]) {
+                sign[comp_pos] = true;
+                bool res = dfs(mat, sign, n, m, lx2, ly2);
+                if (res) return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool process_matrix(const vector< vector<char> >& mat, int x, int y) {
     size_t n = mat.size(), m = mat[0].size();
-    
-    int bx = -1, by = -1;
-    for (int i=0; i<n && bx<0; i++) {
-        for (int j=0; j<m && bx<0; j++) {
-            if (mat[i][j] == 'S') {
-                bx = i;
-                by = j;
-            }
-        }
-    }
-
-    vector< vector<char> > flag(n, vector<char>(m, 0));
-    queue< pair<int, int> > bfsq;
-    bfsq.emplace(bx, by);
-    while (!bfsq.empty()) {
-        size_t s = bfsq.size();
-        while (s--) {
-            pair<int, int> pos = bfsq.front();
-            bfsq.pop();
-
-            flag[pos.first][pos.second] = 1;
-
-            for (int d=0; d<4; d++) {
-                int x2 = pos.first + offset_x[d];
-                int y2 = pos.second + offset_y[d];
-
-                x2 = clamp(x2, n);
-                y2 = clamp(y2, m);
-                
-                if (mat[x2][y2] != '#' && !flag[x2][y2]) {
-                    bfsq.emplace(x2, y2);
-                }
-            }
-        }
-    }
-    
-    // Detect border
-    for (int i = 1; i<m-1; i++) {
-        if (flag[0][i] && flag[n-1][i]) {
-            return true;
-        }
-    }
-    for (int i = 1; i<n-1; i++) {
-        if (flag[i][0] && flag[i][m-1]) {
-            return true;
-        }
-    }
-    return flag[0][0]&&flag[n-1][0] || flag[n-1][0]&&flag[n-1][m-1] || flag[n-1][m-1]&&flag[0][m-1] || flag[0][m-1]&&flag[0][0];
+    unordered_map<u64, bool> sign;
+    sign[compress_position(x, y)] = true;
+    return dfs(mat, sign, n, m, x, y);
 }
 
 int main() {
@@ -71,23 +65,40 @@ int main() {
     cout.tie(0);
 
     string begin_line;
-    while (getline(cin, begin_line), !begin_line.empty() && cin) {
+    while (!cin.eof()) {
+        getline(cin, begin_line);
+
+        if (begin_line.back() == '\r') begin_line.pop_back();
+        if (begin_line.empty()) break;
+
         stringstream sstr(begin_line);
 
         int n, m;
         sstr >> n >> m;
 
-        vector< vector<char> > mat;
-        mat.reserve(n);
+        vector< vector<char> > mat(n, vector<char>(m, false));
+        int sx = 0, sy = 0;
         for (int i=0; i<n; i++) {
             string line;
-            getline(cin, line);
+            cin >> line;
+            while (cin.peek() == '\r' || cin.peek() == '\n') cin.get();
 
-            if (line.back() == '\r') line.pop_back();
-            mat.emplace_back(line.begin(), line.end());
+            for (int j=0; j<m; j++) {
+                switch (line[j]) {
+                    case 'S':
+                        sx = i;
+                        sy = j;
+                    case '.':
+                        mat[i][j] = true;
+                        break;
+                    case '#':
+                        mat[i][j] = false;
+                        break;
+                }
+            }
         }
 
-        cout << (process_matrix(mat)?"Yes":"No") << endl;
+        cout << (process_matrix(mat, sx, sy)?"Yes":"No") << endl;
     }
     return 0;
 }

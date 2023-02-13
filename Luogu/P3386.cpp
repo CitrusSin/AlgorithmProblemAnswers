@@ -2,44 +2,89 @@
 
 using namespace std;
 
-bool extern_path(const vector< vector<int> >& graph, vector<int>& match, vector<char>& mark, int start) {
-    mark[start] = true;
-    for (int next : graph[start]) {
-        if (mark[next]) continue;
-        if (match[next] == -1) {
-            match[next] = start;
-            match[start] = next;
+struct graph_match {
+    vector<int> left, right;
+    graph_match(size_t n, size_t m);
+};
 
-            mark[start] = false;
-            return true;
-        } else if (!mark[match[next]]) {
-            mark[next] = true;
-            bool res = extern_path(graph, match, mark, match[next]);
-            if (res) {
-                match[next] = start;
-                match[start] = next;
-                
-                mark[start] = false;
-                mark[next] = false;
-                return true;
-            }
-            mark[next] = false;
-        }
-    }
-    mark[start] = false;
-    return false;
+graph_match::graph_match(size_t n, size_t m) : left(n, -1), right(m, -1) {}
+
+class graph {
+public:
+    graph(size_t n, size_t m);
+
+    void connect(int a, int b);
+    graph_match find_maximum_match(int& count) const;
+private:
+    vector<set<int>> left, right;
+
+    bool find_extern_path(
+        int right_node,
+        graph_match& match, 
+        vector<char>& mark_left,
+        vector<char>& mark_right
+    ) const;
+};
+
+graph::graph(size_t n, size_t m) : left(n), right(m) {}
+
+void graph::connect(int a, int b) {
+    left[a].insert(b);
+    right[b].insert(a);
 }
 
-int max_match(const vector< vector<int> >& graph, int p) {
-    size_t n = graph.size();
-    vector<int> match(n, -1);
-    vector<char> mark(n, false);
-    
+graph_match graph::find_maximum_match(int& count) const {
+    size_t n = left.size(), m = right.size();
+    graph_match match(n, m);
     int cnt = 0;
-    for (int i=0; i<p; i++) {
-        if (extern_path(graph, match, mark, i)) cnt++;
+    for (int i=0; i<n; i++) {
+        bool found = false;
+        for (int r : left[i]) {
+            vector<char> mark_left(n, false), mark_right(m, false);
+            if (find_extern_path(r, match, mark_left, mark_right)) {
+                match.right[r] = i;
+                match.left[i] = r;
+                found = true;
+                break;
+            }
+        }
+        if (found) cnt++;
     }
-    return cnt;
+    count = cnt;
+    return match;
+}
+
+bool graph::find_extern_path(
+    int right_node,
+    graph_match& match,
+    vector<char>& mark_left,
+    vector<char>& mark_right
+) const {
+    size_t n = left.size(), m = right.size();
+
+    if (mark_right[right_node]) return false;
+    if (match.right[right_node] == -1) {
+        return true;
+    }
+    mark_right[right_node] = true;
+
+    int left_node = match.right[right_node];
+    mark_left[left_node] = true;
+    for (int r2 : left[left_node]) {
+        if (mark_right[r2] || r2 == match.left[left_node]) {
+            continue;
+        }
+        bool res = find_extern_path(r2, match, mark_left, mark_right);
+        if (res) {
+            match.right[r2] = left_node;
+            match.left[left_node] = r2;
+            return true;
+        }
+    }
+    mark_left[left_node] = false;
+
+    mark_right[right_node] = false;
+    return false;
 }
 
 int main() {
@@ -49,23 +94,17 @@ int main() {
 
     int n, m, e;
     cin >> n >> m >> e;
-    vector< set<int> > adjt(n+m);
+
+    graph g(n, m);
     while (e--) {
         int u, v;
         cin >> u >> v;
-        u--;
-        v--;
-        adjt[u].insert(n+v);
-        adjt[n+v].insert(u);
-    }
-    vector< vector<int> > graph(n+m);
-    for (int i=0; i<n+m; i++) {
-        for (int p : adjt[i]) {
-            graph[i].push_back(p);
-        }
+        u--, v--;
+        g.connect(u, v);
     }
 
-    int cnt = max_match(graph, n);
-    cout << cnt << endl;
+    int count = 0;
+    g.find_maximum_match(count);
+    cout << count << endl;
     return 0;
 }

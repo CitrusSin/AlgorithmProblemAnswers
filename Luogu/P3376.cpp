@@ -3,105 +3,113 @@
 using namespace std;
 using u64 = uint64_t;
 
-bool dinic_layer_bfs(
+bool dinitz_layer_bfs(
     const vector<unordered_map<int, u64>>& graph,
     vector<int>& layer,
     int s, int t
 ) {
-    queue<int> nodes;
-    nodes.push(s);
+    queue<int> bfsq;
+    bfsq.push(s);
     layer[s] = 0;
 
-    int cnt = 0;
-    bool result = false;
-    while (!nodes.empty()) {
-        size_t ql = nodes.size();
-        while (ql--) {
-            int node = nodes.front();
-            nodes.pop();
+    int cnt = 1;
+    bool res = false;
+    while (!bfsq.empty()) {
+        size_t sq = bfsq.size();
+        while (sq--) {
+            int node = bfsq.front();
+            bfsq.pop();
 
-            if (node == t) result = true;
+            if (node == t) {
+                res = true;
+            }
+
             for (const pair<int, u64>& conn : graph[node]) {
-                if (layer[conn.first] == -1 && conn.second > 0) {
-                    nodes.push(conn.first);
-                    layer[conn.first] = cnt+1;
+                if (conn.second > 0 && layer[conn.first] == -1) {
+                    layer[conn.first] = cnt;
+                    bfsq.push(conn.first);
                 }
             }
         }
         cnt++;
     }
 
-    return result;
+    return res;
 }
 
-u64 dinic_extpath_dfs(
+u64 dinitz_extpath_dfs(
     vector<unordered_map<int, u64>>& graph,
     const vector<int>& layer,
     int s, int t, u64 max_flow
 ) {
-    if (s == t) return max_flow;
+    if (s == t) {
+        return max_flow;
+    }
 
-    int terminate_layer = layer[t];
     u64 total_flow = 0;
-    for (pair<const int, u64>& conn : graph[s]) {
+    for (const pair<int, u64>& path : graph[s]) {
+        int next_node = path.first;
+        u64 path_flow = path.second;
         if (
-            conn.second > 0 &&
-            layer[conn.first] == layer[s]+1 &&
-            (layer[conn.first] < terminate_layer || conn.first == t)
+            path_flow > 0 &&
+            layer[next_node] == layer[s]+1 &&
+            (layer[next_node]<layer[t] || next_node == t)
         ) {
-            u64 flow = dinic_extpath_dfs(graph, layer, conn.first, t, min(max_flow - total_flow, conn.second));
+            u64 flow = dinitz_extpath_dfs(
+                graph, layer, next_node, t,
+                min(max_flow-total_flow, path_flow)
+            );
             if (flow > 0) {
-                graph[s][conn.first] -= flow;
-                graph[conn.first][s] += flow;
+                graph[s][next_node] -= flow;
+                graph[next_node][s] += flow;
                 total_flow += flow;
             }
-            if (total_flow == max_flow) break;
         }
     }
     return total_flow;
 }
 
-u64 max_flow_dinic(const vector<unordered_map<int, u64>>& graph, int s, int t) {
+u64 max_flow_dinitz(const vector<unordered_map<int, u64>>& graph, int s, int t) {
     const u64 INF_U64 = numeric_limits<u64>::max();
-
-    if (s == t) return INF_U64;
-
     int n = graph.size();
-    vector<unordered_map<int, u64>> graph_rev(n);
+
+    vector<unordered_map<int, u64>> revmap(n);
     for (int i=0; i<n; i++) {
-        for (const auto& conn : graph[i]) {
-            graph_rev[i][conn.first] += conn.second;
-            graph_rev[conn.first][i] += 0;
+        for (const pair<int, u64>& conn : graph[i]) {
+            revmap[i][conn.first] += conn.second;
+            revmap[conn.first][i] += 0;
         }
     }
 
-    u64 flow = 0;
+    u64 total_flow = 0;
     vector<int> layer(n, -1);
-    while (dinic_layer_bfs(graph_rev, layer, s, t)) {
-        flow += dinic_extpath_dfs(graph_rev, layer, s, t, INF_U64);
+    while (dinitz_layer_bfs(revmap, layer, s, t)) {
+        total_flow += dinitz_extpath_dfs(revmap, layer, s, t, INF_U64);
         layer.assign(n, -1);
     }
 
-    return flow;
+    return total_flow;
 }
 
-int main() {
+int main()
+{
     ios::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
 
-    int n, m, s, t;
-    cin >> n >> m >> s >> t;
-    s--, t--;
+    int n, m, s, l;
+    cin >> n >> m >> s >> l;
+    s--, l--;
     vector<unordered_map<int, u64>> graph(n);
-    while (m--) {
+    while (m--)
+    {
         int u, v, w;
         cin >> u >> v >> w;
         u--, v--;
         graph[u][v] = w;
     }
 
-    u64 flow = max_flow_dinic(graph, s, t);
+    u64 flow = max_flow_dinitz(graph, s, l);
     cout << flow << endl;
     return 0;
 }

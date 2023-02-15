@@ -96,26 +96,23 @@ int main() {
     cin.tie(0);
     cout.tie(0);
 
-    int n, m;
-    cin >> n >> m;
+    int n;
+    cin >> n;
 
-    vector<unordered_map<int, u64>> graph(n+m+2);
-    for (int i=0; i<n; i++) {
-        int s;
-        cin >> s;
-        while (s--) {
-            int v;
-            cin >> v;
-            v--;
-            graph[i+2][v+n+2] = 1;
-        }
+    vector<unordered_map<int, u64>> graph(3*n+2);
+    for (int i=0; i<2*n; i++) {
+        int s1, s2;
+        cin >> s1 >> s2;
+        s1--, s2--;
+        graph[i+2][s1+2*n+2] = 1;
+        graph[i+2][s2+2*n+2] = 1;
     }
 
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<2*n; i++) {
         graph[0][i+2] = 1;
     }
-    for (int i=0; i<m; i++) {
-        graph[i+n+2][1] = 1;
+    for (int i=0; i<n; i++) {
+        graph[i+2*n+2][1] = 2;
     }
 
     u64 flow = max_flow_dinitz(graph, 0, 1);

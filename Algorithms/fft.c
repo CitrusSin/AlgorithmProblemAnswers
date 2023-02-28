@@ -50,12 +50,13 @@ void fft(double complex *arr, size_t n) {
 void ifft(double complex *arr, size_t n) {
     assert((n&-n) == n);
     int step = -1;
-    while (n) {
-        n >>= 1;
+    size_t n2 = n;
+    while (n2) {
+        n2 >>= 1;
         step++;
     }
     fft_internal(arr, step, true);
-    for (int i=0; i<n; i++) arr[i] /= (double)n;
+    for (size_t i=0; i<n; i++) arr[i] /= (double)n;
 }
 
 static inline int integerize(double x) {
@@ -82,10 +83,10 @@ void str_mul(char* product, const char* a, const char* b) {
     memset(cb, 0, sizeof(cb));
 
     for (size_t i=0; i<na; i++) {
-        ca[na-i-1] = (double complex)(a[i] & 0x0f);
+        ca[na-i-1] = (double complex)(a[i] - '0');
     }
     for (size_t i=0; i<nb; i++) {
-        ca[nb-i-1] = (double complex)(b[i] & 0x0f);
+        cb[nb-i-1] = (double complex)(b[i] - '0');
     }
 
     fft(ca, n);
@@ -110,8 +111,9 @@ void str_mul(char* product, const char* a, const char* b) {
     *product = '\0';
 }
 
+char product[1000002], a[1000002], b[1000002];
+
 int main() {
-    char a[10001], b[10001], product[20001];
     scanf("%s%s", a, b);
     str_mul(product, a, b);
     printf("%s\n", product);

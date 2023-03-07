@@ -73,8 +73,7 @@ static inline int integerize(double x) {
     return r;
 }
 
-void str_mul(char* product, const char* a, const char* b) {
-    size_t na = strlen(a), nb = strlen(b);
+size_t str_mul_sized(char* product, const char* a, size_t na, const char* b, size_t nb) {
     size_t n = 1 << ((int)ceil(log2(na+nb)));
 
     double complex ca[n], cb[n];
@@ -105,17 +104,38 @@ void str_mul(char* product, const char* a, const char* b) {
         resi[i-1] %= 10;
         if (resi[i]) maxi = i+1;
     }
+
+    size_t len = maxi;
     while (maxi--) {
         *product++ = resi[maxi] + '0';
     }
     *product = '\0';
+    return len;
 }
 
-char product[1000002], a[1000002], b[1000002];
+size_t reads(char* str, size_t max_size) {
+    size_t read_size = 0;
+    int c = getchar();
+    while (c <= 0x20 || c > 0x7E) {
+        c = getchar();
+    }
+    while (read_size < max_size-1) {
+        if (c > 0x20 && c <= 0x7E) {
+            *str++ = c;
+            read_size++;
+            c = getchar();
+        } else break;
+    }
+    *str = '\0';
+    return read_size;
+}
+
+char product[2000002], a[1000002], b[1000002];
 
 int main() {
-    scanf("%s%s", a, b);
-    str_mul(product, a, b);
-    printf("%s\n", product);
+    size_t na = reads(a, sizeof(a)), nb = reads(b, sizeof(b));
+    size_t s = str_mul_sized(product, a, na, b, nb);
+    fwrite(product, s, 1, stdout);
+    putchar('\n');
     return 0;
 }

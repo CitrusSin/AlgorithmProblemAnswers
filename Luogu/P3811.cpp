@@ -1,17 +1,25 @@
 #include <bits/stdc++.h>
 
 using namespace std;
-using u64 = uint64_t;
 
-u64 qpow(u64 base, u64 ex, u64 mod) {
-    u64 res = 1;
-    base %= mod;
-    while (ex) {
-        if (ex&1) res = (res*base)%mod;
-        ex >>= 1;
-        base = (base*base)%mod;
+void extgcd(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1, y = 0;
+        return;
     }
-    return res;
+    extgcd(b, a%b, x, y);
+    int tmp = y;
+    y = x-(a/b)*y;
+    x = tmp;
+}
+
+int inv(int x, int m) {
+    // ax+bm=1
+    int a, b;
+    extgcd(x, m, a, b);
+    while (a < 0) a+=m;
+    a %= m;
+    return a;
 }
 
 int main() {
@@ -19,20 +27,19 @@ int main() {
     cin.tie(0);
     cout.tie(0);
 
-    u64 n, p;
+    int n, p;
     cin >> n >> p;
 
-    cout << 1 << endl;
-    vector<u64> pairs(n+1, 0);
-    for (int i=2; i<=n; i++) {
-        if (pairs[i] == 0) {
-            u64 r = qpow(i, p-2, p);
-            if (r <= n) {
-                pairs[r] = i;
-            }
-            pairs[i] = r;
+    vector<int> nums(n, 0);
+    for (int i=1; i<=n; i++) {
+        if (nums[i-1] == 0) {
+            int rev = inv(i, p);
+            nums[i-1] = rev;
+            if (rev <= n) nums[rev-1] = i;
         }
-        cout << pairs[i] << endl;
+    }
+    for (int i=0; i<n; i++) {
+        cout << nums[i] << endl;
     }
     return 0;
 }

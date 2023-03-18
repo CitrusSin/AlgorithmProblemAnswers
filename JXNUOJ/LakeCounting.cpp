@@ -16,6 +16,7 @@ bool check(int x, int y, bool *water, bool *checked, int n, int m) {
             }
             return true;
         }
+        return false;
     } else return false;
 }
 

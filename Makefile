@@ -1,17 +1,21 @@
 CPP_FILES 	=	$(shell find . -name "*.cpp")
 C_FILES		=	$(shell find . -name "*.c")
 
-EXC_FILES	=	$(patsubst %.cpp, %, $(CPP_FILES)) $(patsubst %.c, %, $(C_FILES))
+EXC_FILES	=	$(foreach f, $(patsubst %.cpp, %, $(CPP_FILES)) $(patsubst %.c, %, $(C_FILES)), ./build/$f)
 
 .PHONY: all clean
 
 all: $(EXC_FILES)
 
 clean:
-	rm $(EXC_FILES)
+	rm -r build/*
 
-%: %.cpp 
-	g++ -O2 $^ -o $@
+build/%: %.cpp
+	- mkdir -p $@
+	- rmdir $@
+	gcc -O2 $^ -o $@ -lm -lstdc++
 
-%: %.c
+build/%: %.c
+	- mkdir -p $@
+	- rmdir $@
 	gcc -O2 $^ -o $@ -lm

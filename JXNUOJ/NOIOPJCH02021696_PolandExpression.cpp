@@ -43,7 +43,7 @@ double pol_exp(const string &exp) {
 
 int main() {
     char expr_buf[201];
-    gets(expr_buf);
+    fgets(expr_buf, 201, stdin);
 
     double result = pol_exp(expr_buf);
 

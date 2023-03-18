@@ -73,7 +73,7 @@ bool calculate_expression(const char *ptr) {
 int main() {
     int counter = 1;
     char s[1001];
-    while (gets(s)) {
+    while (fgets(s, 1001, stdin)) {
         cout << "Expression " << counter << ": " << (calculate_expression(s)?"V":"F") << endl;
         counter++;
     }

@@ -126,3 +126,7 @@ void disset<T>::sign(const T &x) {
 }
 
 // Example: See Luogu/P1621
+int main() {
+
+    return 0;
+}

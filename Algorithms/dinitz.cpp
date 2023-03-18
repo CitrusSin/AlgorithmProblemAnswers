@@ -90,3 +90,8 @@ u64 max_flow_dinitz(const vector<unordered_map<int, u64>>& graph, int s, int t) 
 
     return total_flow;
 }
+
+int main() {
+
+    return 0;
+}

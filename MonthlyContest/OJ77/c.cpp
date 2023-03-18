@@ -106,7 +106,7 @@ void disset<T>::merge(const T &a, const T &b) {
 template <typename T>
 bool disset<T>::query(const T &a, const T &b) const {
     try {
-        return raw_set.query(index_map[a], index_map[b]);
+        return raw_set.query(index_map.at(a), index_map.at(b));
     } catch(...) {
         return false;
     }

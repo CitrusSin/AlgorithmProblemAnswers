@@ -77,3 +77,8 @@ vector<u64> shortest_path_all_heap(const vector<vector<pair<int, u64>>>& adjt, i
 
     return dist;
 }
+
+int main() {
+
+    return 0;
+}

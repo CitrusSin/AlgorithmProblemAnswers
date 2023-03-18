@@ -108,7 +108,7 @@ int main() {
     for (int i=0; i<n; i++) {
         int len;
         scanf("%d\n", &len);
-        gets(buf_input);
+        fgets(buf_input, 100001, stdin);
 
         int op_count = palin_count(buf_input);
         printf("%d\n", op_count);

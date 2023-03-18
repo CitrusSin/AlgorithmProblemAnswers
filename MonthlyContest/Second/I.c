@@ -8,7 +8,7 @@ char s[200001];
 int main() {
     int n, c, q;
     scanf("%d%d%d\n", &n, &c, &q);
-    gets(s);
+    fgets(s, 200001, stdin);
     
     for (int i=0; i<c; i++) {
         int l, r;

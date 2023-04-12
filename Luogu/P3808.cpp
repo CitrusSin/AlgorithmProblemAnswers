@@ -8,6 +8,7 @@
 #include <optional>
 
 using namespace std;
+using u64 = uint64_t;
 
 struct _AcTrieNode {
     char ch;
@@ -79,9 +80,9 @@ public:
         }
     }
 
-    map<string, vector<int>> match_all(const string& src) const {
+    unordered_map<string, vector<int>> match_all(const string& src) const {
         const _AcTrieNode* p = &root_node;
-        map<string, vector<int>> found_map;
+        unordered_map<string, vector<int>> found_map;
         int idx = 0;
         for (char c : src) {
             while (p != &root_node && !p->child.count(c)) {
@@ -105,14 +106,32 @@ public:
 };
 
 int main() {
-    AcAutomaton test;
-    test.add_pattern_string("he");
-    test.add_pattern_string("her");
-    test.add_pattern_string("say");
-    test.add_pattern_string("she");
-    test.add_pattern_string("shr");
-    test.build_fail_back();
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
 
-    map<string, vector<int>> res = test.match_all("hesayhersheshe");
+    int n;
+    cin >> n;
+
+    unordered_map<string, int> counts;
+    AcAutomaton mt;
+    for (int i=0; i<n; i++) {
+        string s;
+        cin >> s;
+        counts[s]++;
+        mt.add_pattern_string(s);
+    }
+    mt.build_fail_back();
+
+    string t;
+    cin >> t;
+    unordered_map<string, vector<int>> result = mt.match_all(t);
+
+    u64 total = 0;
+    for (const pair<string, vector<int>>& p : result) {
+        total += counts[p.first];
+    }
+
+    cout << total << endl;
     return 0;
 }

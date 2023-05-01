@@ -2,40 +2,46 @@
 
 using namespace std;
 
+size_t lis(const vector<int>& arr) {
+    size_t n = arr.size();
+    if (n == 0) return 0;
+
+    vector<int> lst;
+    lst.reserve(n);
+    lst.push_back(arr[0]);
+    for (size_t i=1; i<n; i++) {
+        size_t max_len = lower_bound(lst.begin(), lst.end(), arr[i]) - lst.begin();
+        if (max_len == lst.size()) {
+            lst.push_back(arr[i]);
+        } else {
+            lst[max_len] = min(lst[max_len], arr[i]);
+        }
+    }
+    return lst.size();
+}
+
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
     int n;
     cin >> n;
 
-    int a[n], b[n];
+    unordered_map<int, int> indices;
     for (int i=0; i<n; i++) {
-        cin >> a[i];
-    }
-    for (int i=0; i<n; i++) {
-        cin >> b[i];
-    }
-
-    int dp[n][n];
-    for (int i=0; i<n; i++) {
-        for (int j=0; j<n; j++) {
-            if (a[i] == b[j]) {
-                int val = 1;
-                if (i > 0 && j > 0) {
-                    val += dp[i-1][j-1];
-                }
-                dp[i][j] = val;
-            } else {
-                int val = 0;
-                if (i > 0) {
-                    val = max(val, dp[i-1][j]);
-                }
-                if (j > 0) {
-                    val = max(val, dp[i][j-1]);
-                }
-                dp[i][j] = val;
-            }
-        }
+        int p;
+        cin >> p;
+        indices[p] = i;
     }
 
-    cout << dp[n-1][n-1] << endl;
+    vector<int> c(n);
+    for (int i=0; i<n; i++) {
+        int p;
+        cin >> p;
+        c[i] = indices[p];
+    }
+
+    cout << lis(c) << endl;
     return 0;
 }

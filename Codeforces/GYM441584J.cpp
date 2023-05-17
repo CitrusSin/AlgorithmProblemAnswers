@@ -56,15 +56,13 @@ void solve() {
     l2 /= k;
     l3 /= k;
 
-    for (i64 k=1; ; k++) {
-        auto p1 = square_split(l1), p2 = square_split(l2);
-        for (const auto& pt1 : p1) {
-            for (const auto& pt2 : p2) {
-                auto v3 = pt1-pt2;
-                if (squ(v3.first) + squ(v3.second) == l3) {
-                    cout << "0 0 " << pt1.first << ' ' << pt1.second << ' ' << pt2.first << ' ' << pt2.second << endl;
-                    return;
-                }
+    auto p1 = square_split(l1), p2 = square_split(l2);
+    for (const auto& pt1 : p1) {
+        for (const auto& pt2 : p2) {
+            auto v3 = pt1-pt2;
+            if (squ(v3.first) + squ(v3.second) == l3) {
+                cout << "0 0 " << pt1.first << ' ' << pt1.second << ' ' << pt2.first << ' ' << pt2.second << endl;
+                return;
             }
         }
     }

@@ -92,6 +92,22 @@ u64 max_flow_dinitz(const vector<unordered_map<int, u64>>& graph, int s, int t) 
 }
 
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
 
+    int n, m, s, t;
+    cin >> n >> m >> s >> t;
+    s--, t--;
+    vector<unordered_map<int, u64>> graph(n);
+    while (m--) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        graph[u][v] += w;
+    }
+
+    u64 flow = max_flow_dinitz(graph, s, t);
+    cout << flow << endl;
     return 0;
 }

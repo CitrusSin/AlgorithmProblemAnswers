@@ -85,7 +85,7 @@ string str_mul(StrIter b, StrIter e) {
         const string& str = *it;
         total_size += str.size();
     }
-    size_t n = 1 << ((int)ceilf128(log2f128(total_size)));
+    size_t n = 1 << ((int)ceil(log2(total_size)));
 
     vector<complex<double>> fnum(n, complex<double>(1, 0));
     int cnt = 0;

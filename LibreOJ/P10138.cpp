@@ -25,6 +25,9 @@ private:
             i64 mid = l + (r - l) / 2;
             build(2*i+1, l, mid, pro);
             build(2*i+2, mid+1, r, pro);
+
+            sgt[i].sum = sgt[2*i+1].sum + sgt[2*i+2].sum;
+            sgt[i].max = max(sgt[2*i+1].max, sgt[2*i+2].max);
         }
     }
 
@@ -101,15 +104,7 @@ private:
     }
 public:
     explicit SegTree(size_t n) : sgt(4 * n) {
-        build(0, 0, n, [](){return 0;});
-    }
-
-    template <typename Iter>
-    SegTree(Iter&& b, Iter&& e) {
-        size_t n = e-b;
-        build(0, 0, n, [&](){
-            return *(b++);
-        });
+        build(0, 0, n-1, [](){return 0;});
     }
 
     void modify(i64 l, i64 r, i64 delta) {
@@ -137,22 +132,22 @@ public:
 
 class TreeMan {
 private:
-    vector<vector<int>> tree;
-    int n;
-    vector<int> fa;
-    vector<int> weight;
-    vector<int> hson;
-    vector<int> dep;
-    vector<int> dfn;
-    vector<int> rnk;
-    vector<int> top;
+    vector<vector<i64>> tree;
+    i64 n;
+    vector<i64> fa;
+    vector<i64> weight;
+    vector<i64> hson;
+    vector<i64> dep;
+    vector<i64> dfn;
+    vector<i64> rnk;
+    vector<i64> top;
 
-    void init(int i) {
+    void init(i64 i) {
         weight[i] = 1;
         if (fa[i] == -1) dep[i] = 0; else dep[i] = dep[fa[i]] + 1;
 
-        int heaviest = -1;
-        for (int ch : tree[i]) {
+        i64 heaviest = -1;
+        for (i64 ch : tree[i]) {
             if (ch == fa[i]) continue;
             fa[ch] = i;
             init(ch);
@@ -165,7 +160,7 @@ private:
         hson[i] = heaviest;
     }
 
-    void init2(int i, int& cnt) {
+    void init2(i64 i, i64& cnt) {
         dfn[i] = cnt++;
         rnk[dfn[i]] = i;
 
@@ -174,7 +169,7 @@ private:
             init2(hson[i], cnt);
         }
 
-        for (int ch : tree[i]) {
+        for (i64 ch : tree[i]) {
             if (ch == fa[i]) continue;
             if (ch != hson[i]) {
                 top[ch] = ch;
@@ -183,7 +178,7 @@ private:
         }
     }
 public:
-    TreeMan(vector<vector<int>>&& tr) :
+    TreeMan(vector<vector<i64>>&& tr) :
         tree(std::move(tr)),
         n(tree.size()), 
         fa(n, -1), 
@@ -196,27 +191,27 @@ public:
     {
         init(0);
 
-        int cnt = 0;
+        i64 cnt = 0;
         top[0] = 0;
         init2(0, cnt);
     }
 
-    void set(SegTree& sgt, int i, int v) {
+    void set(SegTree& sgt, i64 i, i64 v) {
         sgt.set(dfn[i], v);
     }
 
-    int lca(int u, int v) {
+    i64 lca(i64 u, i64 v) {
         while (top[u] != top[v]) {
             if (dep[top[u]] > dep[top[v]]) u = fa[top[u]]; else v = fa[top[v]];
         }
         return dep[u] > dep[v] ? v : u;
     }
 
-    int querySum(const SegTree& sgt, int u, int v) {
+    i64 querySum(const SegTree& sgt, i64 u, i64 v) {
         if (u == v) return sgt.querySum(dfn[u], dfn[v]);
 
-        int a = lca(u, v);
-        int sum = 0;
+        i64 a = lca(u, v);
+        i64 sum = 0;
         while (top[u] != top[a]) {
             sum += sgt.querySum(dfn[top[u]], dfn[u]);
             u = fa[top[u]];
@@ -231,43 +226,49 @@ public:
         if (v != a) {
             sum += sgt.querySum(dfn[a], dfn[v]);
         }
+        if (u == a && v == a) {
+            sum += sgt.get(dfn[a]);
+        }
         return sum;
     }
 
-    int queryMax(const SegTree& sgt, int u, int v) {
+    i64 queryMax(const SegTree& sgt, i64 u, i64 v) {
         if (u == v) return sgt.queryMax(dfn[u], dfn[v]);
 
-        int a = lca(u, v);
-        int ans = numeric_limits<int>::min();
+        i64 a = lca(u, v);
+        i64 ans = numeric_limits<i64>::min();
         while (top[u] != top[a]) {
-            ans = max<int>(ans, sgt.queryMax(dfn[top[u]], dfn[u]));
+            ans = max(ans, sgt.queryMax(dfn[top[u]], dfn[u]));
             u = fa[top[u]];
         }
         if (u != a) {
-            ans = max<int>(ans, sgt.queryMax(dfn[a], dfn[u]));
+            ans = max(ans, sgt.queryMax(dfn[a], dfn[u]));
         }
         while (top[v] != top[a]) {
-            ans = max<int>(ans, sgt.queryMax(dfn[top[v]], dfn[v]));
+            ans = max(ans, sgt.queryMax(dfn[top[v]], dfn[v]));
             v = fa[top[v]];
         }
         if (v != a) {
-            ans = max<int>(ans, sgt.queryMax(dfn[a], dfn[v]));
+            ans = max(ans, sgt.queryMax(dfn[a], dfn[v]));
+        }
+        if (u == a && v == a) {
+            ans = max(ans, sgt.get(dfn[a]));
         }
         return ans;
     }
 };
 
-TreeMan readTree(istream& input, int n) {
-    vector<vector<int>> tree(n);
+TreeMan readTree(istream& input, i64 n) {
+    vector<vector<i64>> tree(n);
 
-    for (int i=0; i<n-1; i++) {
-        int a, b;
+    for (i64 i=0; i<n-1; i++) {
+        i64 a, b;
         input >> a >> b;
         a--, b--;
         tree[a].push_back(b);
         tree[b].push_back(a);
     }
-    for (vector<int>& nx : tree) {
+    for (vector<i64>& nx : tree) {
         sort(nx.begin(), nx.end());
         auto it = unique(nx.begin(), nx.end());
         nx.erase(it, nx.end());

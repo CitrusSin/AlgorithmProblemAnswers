@@ -8,6 +8,9 @@
 using u64 = std::uint64_t;
 using u32 = std::uint32_t;
 
+std::random_device rdev;
+std::mt19937_64 eng(rdev());
+
 constexpr u64 precise_mul(u64 a, u64 b, u64 mod) {
     __int128_t v = a;
     v *= b;
@@ -30,12 +33,7 @@ bool miller_rabin(u64 x, int ti = 50) {
     if (x == 2) return true;
     if (x % 2 == 0) return false;
 
-    auto tm = std::chrono::system_clock::now();
-    u64 tick = std::chrono::duration_cast<std::chrono::nanoseconds>(tm.time_since_epoch()).count();
-    std::uniform_int_distribution<u64> dis(1, x-1);
-    std::mt19937_64 mteng(tick);
-
-    std::function<u64()> rd = [&dis, &mteng]() {return dis(mteng);};
+    std::uniform_int_distribution<u64> rd(1, x-1);
 
     u64 u = x-1, t = 0;
     while (u % 2 == 0) {
@@ -44,7 +42,7 @@ bool miller_rabin(u64 x, int ti = 50) {
     }
 
     for (; ti > 0; ti--) {
-        u64 a = rd();
+        u64 a = rd(eng);
         u64 d = qpow(a, u, x);
         if (d == 1) continue;
         for (u64 i=0; i<t; i++) {
@@ -62,12 +60,12 @@ u64 gcd(u64 a, u64 b) {
 }
 
 u64 pollard_rho(u64 n) {
-    auto tm = std::chrono::system_clock::now();
-    u64 tick = std::chrono::duration_cast<std::chrono::nanoseconds>(tm.time_since_epoch()).count();
-    std::uniform_int_distribution<u64> dis(1, n-1);
-    std::mt19937_64 mteng(tick);
+    std::random_device dev;
+    dev.entropy();
 
-    std::function<u64()> rd = [&dis, &mteng]() {return dis(mteng);};
+    if (n % 2 == 0) return 2;
+
+    std::uniform_int_distribution<u64> rd(1, n-1);
 
     u64 c;
     std::function<u64(u64)> f = [n, &c](u64 x) {
@@ -75,12 +73,11 @@ u64 pollard_rho(u64 n) {
     };
 
     for ( ; ; ) {
-        c = rd();
+        c = rd(eng);
 
         u64 a = f(0), b = f(f(0));
 
-        u64 t = 0;
-        while ((t += a != b), t <= 2) {
+        while (a != b) {
             u64 d = gcd(n, a>b?a-b:b-a);
             if (d != 1 && d != n) return d;
             a = f(a);
@@ -120,8 +117,8 @@ std::vector<std::pair<u64, u64>> prime_decomp(u64 x) {
 }
 
 int main() {
-    for (u64 t=14214124; t<8953422546334; t++) {
-        std::vector<std::pair<u64, u64>> dec = prime_decomp(t);
+    for (u64 i=1; i<10000; i++) {
+        std::vector<std::pair<u64, u64>> dec = prime_decomp(i);
         for (auto& p : dec) {
             std::cout << p.first << ',' << p.second << ' ';
         }

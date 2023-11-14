@@ -60,9 +60,6 @@ u64 gcd(u64 a, u64 b) {
 }
 
 u64 pollard_rho(u64 n) {
-    std::random_device dev;
-    dev.entropy();
-
     if (n % 2 == 0) return 2;
 
     std::uniform_int_distribution<u64> rd(1, n-1);

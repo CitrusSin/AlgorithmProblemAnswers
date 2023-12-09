@@ -31,7 +31,7 @@ int main() {
     }
 
     long long result = min_cost(arr, n);
-    printf("%ld\n", result);
-    delete arr;
+    printf("%lld\n", result);
+    delete[] arr;
     return 0;
 }

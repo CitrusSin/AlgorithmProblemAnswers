@@ -114,7 +114,7 @@ std::vector<std::pair<u64, u64>> prime_decomp(u64 x) {
 }
 
 int main() {
-    for (u64 i=1; i<10000; i++) {
+    for (u64 i=100000000000; i<100000010000; i++) {
         std::vector<std::pair<u64, u64>> dec = prime_decomp(i);
         for (auto& p : dec) {
             std::cout << p.first << ',' << p.second << ' ';

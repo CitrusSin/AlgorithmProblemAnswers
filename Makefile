@@ -1,3 +1,5 @@
+CC			=	clang
+
 CPP_FILES 	=	$(shell find . -name "*.cpp")
 C_FILES		=	$(shell find . -name "*.c")
 
@@ -13,9 +15,9 @@ clean:
 build/%: %.cpp
 	- mkdir -p $@
 	- rmdir $@
-	gcc -O2 $^ -o $@ -lm -lstdc++
+	$(CC) -O2 -std=gnu++20 $^ -o $@ -lm -lstdc++
 
 build/%: %.c
 	- mkdir -p $@
 	- rmdir $@
-	gcc -O2 $^ -o $@ -lm
+	$(CC) -O2 $^ -o $@ -lm

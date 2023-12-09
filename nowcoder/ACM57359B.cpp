@@ -18,7 +18,7 @@ int main() {
     }
     if (flag) {
         cout << 0 << endl;
-        return;
+        return 0;
     }
 
     int l=0, r=0;

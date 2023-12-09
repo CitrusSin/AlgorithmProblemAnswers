@@ -7,7 +7,7 @@ using namespace std;
 
 void convert_binary(bool *arr, unsigned long long n) {
     while (n > 0) {
-        *arr = n & 1 == 1;
+        *arr = (n & 1) == 1;
         n >>= 1;
         arr++;
     }

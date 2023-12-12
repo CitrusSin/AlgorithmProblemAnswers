@@ -101,10 +101,9 @@ void test() {
     for (unsigned int i=0; i<thread_count; i++) {
         threads.emplace_back(task);
     }
-    for (unsigned int i=1; i<thread_count; i++) {
-        threads[i].detach();
+    for (unsigned int i=0; i<thread_count; i++) {
+        threads[i].join();
     }
-    threads[0].join();
 }
 
 int main() {

@@ -5,10 +5,10 @@ C_FILES		=	$(shell find . -name "*.c")
 
 EXC_FILES	=	$(foreach f, $(patsubst %.cpp, %, $(CPP_FILES)) $(patsubst %.c, %, $(C_FILES)), ./build/$f)
 
-.PHONY: all clean
-
+.PHONY: all
 all: $(EXC_FILES)
 
+.PHONY: clean
 clean:
 	rm -r build/*
 
@@ -21,3 +21,7 @@ build/%: %.c
 	- mkdir -p $@
 	- rmdir $@
 	$(CC) -O2 $^ -o $@ -lm
+
+.PHONY: run/%
+run/%: build/%
+	$^

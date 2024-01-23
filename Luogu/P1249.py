@@ -10,7 +10,8 @@ for i in range(m-2, m-2-rem, -1):
 
 pdt = 1
 for x in lst:
-    print(x, end = ' ')
+    print(x, end=' ')
     pdt *= x
 print()
 print(pdt)
+

@@ -7,8 +7,11 @@ def mex(s: set) -> int:
             return i
     return len(s)
 
-prse = dict()
+prsek = dict()
 def sg(m: int, k: int):
+    if not k in prsek:
+        prsek[k] = dict()
+    prse = prsek[k]
     if m < 2*k:
         return 0
     if m in prse.keys():

@@ -129,7 +129,7 @@ public:
                 while (j < n && m(j, i) == 0) j++;
                 if (j == n) {
                     // 
-                    throw runtime_error("Arimethic error");
+                    throw runtime_error("Arimetic error");
                 }
                 m.swap_rows(i, j);
                 sc.swap_rows(i, j);

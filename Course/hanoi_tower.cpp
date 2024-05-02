@@ -1,8 +1,10 @@
 #include <array>
 #include <iostream>
 #include <numeric>
+#include <utility>
 #include <vector>
 #include <cstdint>
+#include <map>
 
 using namespace std;
 
@@ -50,7 +52,6 @@ int main() {
 
     int64_t step_counter = 1;
     hanoi_operate(n, 0, 2, 1, step_counter, pillows);
-
     return 0;
 }
 
